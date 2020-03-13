@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>let's chat</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    #all {
+        background-color: black;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    #show {
+        background-color: black;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+    }
+
+    #title {
+        padding: 1.333vw;
+        border: 0.267vw solid white;
+        color: white;
+        transform: scale(0);
+        animation-fill-mode: forwards;
+        animation-name: showflash;
+        animation-duration: 2s;
+        /* display: none; */
+    }
+
+    @keyframes showflash {
+        60% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        100% {
+            opacity: 0;
+        }
+    }
+
+    #input {
+        display: none;
+    }
+
+    #name {
+        width: 40vw;
+        height: 5vw;
+        border: none;
+        box-shadow: 0 0 0 0.267vw black, 0 0 0 0.667vw white;
+        /* outline: solid 5px white; */
+        border-radius: 0.667vw;
+        background-color: white;
+    }
+
+    #sub {
+        border: none;
+        box-shadow: 0 0 0 0.267vw black, 0 0 0 0.667vw white;
+        margin-left: 1.333vw;
+        width: 5.333vw;
+        height: 5vw;
+        border-radius: 3px;
+    }
+
+    #main {
+        border: 0.3vw solid white;
+        padding: 1.333vw;
+        width: 60vw;
+        height: 60vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .word {
+        background-color: white;
+        border-radius: 0.5vw 1.333vw 1.333vw 0.5vw;
+        display: inline-block;
+        padding: 0 1vw;
+        margin-left: 1.333vw;
+        position: relative;
+        word-wrap: break-word;
+        word-break: break-all;
+        max-width: 55vw;
+    }
+
+    .word::before {
+        content: "";
+        border: 0.8vw solid transparent;
+        border-right: 0.8vw solid white;
+        position: absolute;
+        left: -1.5vw;
+
+    }
+
+    .showName {
+        color: rgba(255, 255, 255, 0.644);
+    }
+
+    .one {
+        margin: 10px 0
+    }
+
+    #text {
+        width: 40vw;
+        height: 5vw;
+        border: none;
+        margin-top: 6vh;
+        border-radius: 0.667vw;
+        background-color: white;
+    }
+
+    #send {
+        margin-top: 6vh;
+        margin-left: 1.333vw;
+        height: 4vw;
+        border: none;
+        border-radius: 3px;
+        background-color: white;
+    }
+
+    #page {
+        display: none;
+    }
+</style>
+
+<body>
+    <div id="show">
+        <h1 id="title">Welcome to myChat</h1>
+        <div id="input">
+            <input type="text" id="name" name="name" placeholder="please input a name">
+            <input id="sub" type="submit" value="OK">
+        </div>
+        <div id="page">
+            <div id="main">
+
+            </div>
+            <div>
+                <input type="text" id="text" name="text">
+                <input type="submit" value="Send" id="send">
+            </div>
+        </div>
+    </div>
+
+
+    </div>
+    <script>
+        let main = document.getElementById("main")
+        let page = document.getElementById("page")
+        let input = document.getElementById("input");
+        let title = document.getElementById('title');
+        setTimeout(function () {
+            title.style.display = "none";
+            input.style.display = "block";
+        }, 2300)
+
+
+        if (window.WebSocket) {
+            var ws = new WebSocket('ws://localhost:3000');
+
+            let name_btn = document.getElementById("sub");
+            let name = document.getElementById("name")
+            name_btn.onclick = function () {
+                input.style.display = "none"
+                page.style.display = "block"
+            }
+
+
+            let text_btn = document.getElementById("send");
+            let text = document.getElementById("text")
+            text_btn.onclick = function () {
+                ws.send(JSON.stringify({ "text": text.value, "name": name.value }));
+                text.value=""
+            }
+
+            // text_btn.addEventListener("click", function () {
+            //     ws.send(JSON.stringify({ "text": text.value, "name": name.value }))
+            // })
+
+            // text_btn.addEventListener("touchstart", function () {
+            //     ws.send(JSON.stringify({ "text": text.value, "name": name.value }))
+            // })
+
+
+            ws.onclose = function (e) {
+                console.log("服务器关闭");
+            }
+
+            ws.onerror = function () {
+                console.log("连接出错");
+            }
+            // 接收服务器的消息
+            ws.onmessage = function (e) {
+                let res = JSON.parse(e.data)
+                let odiv = document.createElement("div");
+                odiv.className = "one";
+
+                let odiv1 = document.createElement("div");
+                odiv1.innerHTML = res.name;
+                odiv1.className = "showName";
+
+                let odiv2 = document.createElement("div");
+                odiv2.innerHTML = res.text;
+                odiv2.className = "word";
+
+                odiv.appendChild(odiv1);
+                odiv.appendChild(odiv2);
+                main.appendChild(odiv)
+
+            }
+        }
+
+
+
+
+      //  }
+
+    </script>
+</body>
+
+</html>
